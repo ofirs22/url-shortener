@@ -4,16 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 class RedisClient {
-  static getClient() {
-    throw new Error('Method not implemented.');
-  }
-  static mockReturnValue(arg0: { getClient: jest.Mock<any, any, any>; }) {
-    throw new Error('Method not implemented.');
-  }
+
   private static instance: RedisClient;
   private client;
-
+  
   private constructor() {
+    //connect instance the first time in the constructor only once, constructor cant be called from outside the class
     this.client = createClient({
       password: process.env.REDIS_API_KEY || undefined, // Use API key if provided
       socket: {
@@ -27,15 +23,18 @@ class RedisClient {
 
   // Initialize and connect to Redis
   public static async getInstance(): Promise<RedisClient> {
+    //if instance not exist create it
     if (!RedisClient.instance) {
       const instance = new RedisClient();
       await instance.connect();
       RedisClient.instance = instance;
     }
+    //return the existing instance or the newly created one
     return RedisClient.instance;
   }
-
+  
   private async connect(): Promise<void> {
+    //if client not already connected 
     if (!this.client.isOpen) {
       await this.client.connect();
       console.log('Connected to Redis');

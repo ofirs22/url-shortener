@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 import RedisClient from '../config/redis.config';
 import UrlModel from '../model/Url';
@@ -9,6 +9,7 @@ import { isAuthenticated } from '../middlewares/auth.middleware'
 // Helper function to update analytics asynchronously
 const updateAnalytics = async (shortId: string) => {
     try {
+      // when short url is clicked, update the analytics async
       await UrlModel.updateOne(
         { shortUrl: shortId },
         {
@@ -139,12 +140,16 @@ const getShortUrl = async (req: Request, res: Response): Promise<void | any> => 
     // First, check if the URL is cached in Redis
     const cachedLongUrl = await client.get(shortId);
     if(cachedLongUrl){
+      //return it in case its in the cache
       return res.status(200).send({ success: true, shortUrl: `${process.env.BASE_SHORTENED_URL}/${cachedLongUrl}`, message: 'Short URL created successfully' });
     }
+    //in case its not in cache, fetch it from the db
     const urlEntry = await UrlModel.findOne({ shortUrl: shortId });
     if(!urlEntry){
+      //return 404 if its not exist in db too
       return res.status(404).send({ success: false, error: `${process.env.BASE_SHORTENED_URL}/${shortId} Short URL not found` });
     }
+    //return the short url
     return res.status(200).send({ success: true, longUrl: urlEntry?.longUrl, message: 'Short URL fetched successfully' });
 };
 
@@ -152,11 +157,24 @@ const getUrlAnalytics = async(req: Request, res: Response):Promise<void | any> =
     const { shortId } = req.params;
 
     try{
+        //get the data from the db by short url
         const urlEntry:IUrl | null = await UrlModel.findOne({ shortUrl: shortId });
         if(!urlEntry){
-            return res.status(404).send({ success: false, error: `${process.env.BASE_SHORTENED_URL}/${shortId} Short URL not found` });
+          //if its not exist
+            return res.status(404)
+            .send({ 
+              success: false, 
+              error: `${process.env.BASE_SHORTENED_URL}/${shortId} Short URL not found` 
+            });
         }
-        return res.status(200).send({ success: true, clicks: urlEntry?.analytics?.clicks, lastAccessed: urlEntry?.analytics?.lastAccessed, message: 'URL analytics fetched successfully' });
+        //return only the analytics part
+        return res.status(200)
+        .send({ 
+          success: true, 
+          clicks: urlEntry?.analytics?.clicks, 
+          lastAccessed: urlEntry?.analytics?.lastAccessed, 
+          message: 'URL analytics fetched successfully' 
+        });
     } catch (error) {
         return res.status(500).send({ error: `Internal Server Error: ${error}` });
     }
@@ -169,13 +187,23 @@ const getUserUrls = async(req:Request, res: Response):Promise<void | any> => {
     try {
         //find all urls belong to the given user
         const urls = await UrlModel.find({userId});
+        //if found
         if (urls.length) {
             return res.status(200).send({ success: true, urls, message: 'URLs fetched successfully'});
         }
-        return res.status(404).send({ success: false, message: 'No URLs found for this user' });
+        //if no urls for the given user
+        return res.status(404)
+        .send({ 
+          success: false, 
+          message: 'No URLs found for this user' 
+        });
     }
     catch (error: any) {
-        res.status(500).send({success: false, message: `internal server error ${error?.message}`})
+        res.status(500).
+        end({
+          success: false, 
+          message: `internal server error ${error?.message}`
+        })
     }
 }
 
@@ -185,20 +213,36 @@ const updateLongUrl = async(req:Request, res: Response):Promise<void | any> => {
     const { newLongUrl, shortUrl } = req.body;
 
     try{
+        //look for the new long url in the db
         const isUrlExist = await UrlModel.findOne({longUrl: newLongUrl});
         console.log(isUrlExist)
+        //if it exists return 400 bad request with message that the url already exist in the db
         if(isUrlExist){
             return res.status(400).send({success: false, message: `Long URL ${newLongUrl} already exists`})
         }
-        const updatedUrl = await UrlModel.findOneAndUpdate({shortUrl}, {longUrl: newLongUrl}, {new: true});
+        //update the db with the new long url
+        const updatedUrl = await UrlModel
+        .findOneAndUpdate({
+          shortUrl}, 
+          {longUrl: newLongUrl}, 
+          {new: true});
+          //get redis instance and connect to it
         const redis = await RedisClient.getInstance();
         const client = redis.getClient();
+        //check if the short url exists in cache
         const longUrl = await client.get(shortUrl);
+        //if it exists
         if(longUrl!== null){
           // Update the key if it exists
             client.set(shortUrl, newLongUrl);      
         }
-        return res.status(201).send({success: true, message: `Url was updated successfuly`, newLongUrl: updatedUrl?.longUrl})
+        //return the new long url
+        return res.status(201)
+        .send({
+          success: true, 
+          message: `Url was updated successfuly`, 
+          newLongUrl: updatedUrl?.longUrl
+        })
     }
     catch(error:any){
         return res.status(500).send({success: false, message: `internal server error ${error?.message}`}) 
@@ -208,13 +252,19 @@ const updateLongUrl = async(req:Request, res: Response):Promise<void | any> => {
 const deleteUrl = async(req: Request, res: Response): Promise<void | any> =>{
     const { shortUrl } = req.params;
     try{
+      //delete the url from the db
         const deletedUrl = await UrlModel.findOneAndDelete({shortUrl});
-            // Get Redis client instance
+            // Get Redis client instance and connect
         const redis = await RedisClient.getInstance();
         const client = redis.getClient();
+        //delete it from cache if it exists
         const delEntry = await client.del(shortUrl)
 
-        return res.status(200).send({success: true, message: `Short URL ${shortUrl} has been deleted successfully`})
+        return res.status(200)
+        .send({
+          success: true, 
+          message: `Short URL ${shortUrl} has been deleted successfully`
+        })
     }
     catch(error:any){
         return res.status(500).send({success: false, message: `Internal server error ${error.message}`})
@@ -229,6 +279,5 @@ export {
     redirectToLongUrl,
     getUserUrls,
     updateLongUrl,
-    deleteUrl,
-    updateAnalytics
+    deleteUrl
 };

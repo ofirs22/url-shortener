@@ -9,19 +9,30 @@ const signupUser = async(req: Request, res: Response, next: NextFunction): Promi
     const { email, password } = req.body;
 
     if((!email) || (!password)){
-        console.log("inside if")
+      //if email and/or password missing
         return res.status(400).send({success: false, message: "Email and password are required"})
     }
     try{
+      //check if email already exists
         const user:IUser | null = await userModel.findOne({ email });
         if(user){
-            return res.status(400).send({ success: false, message: `User with email ${email} already exists` });
+          //return bad request in case user exist
+            return res.status(400)
+            .send({ 
+              success: false, 
+              message: `User with email ${email} already exists` 
+            });
         }
+        //encrypt the password using secret and save it to the db not as plain text
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         const newUser:IUser = new userModel({ email, password: hashedPassword });
         await newUser.save();
-        return res.status(201).send({ success: true, message: 'User created successfully' });
+        return res.status(201)
+        .send({ 
+          success: true, 
+          message: 'User created successfully' 
+        });
     } catch (error) {
         console.log(error)
         return res.status(500).send({ error: `Internal Server Error: ${error}` });

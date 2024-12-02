@@ -38,6 +38,23 @@ Url's can be shorten weather the user is logged in or not, logged in users can e
    - You can signup using the signup button and login using the login button
    - JWT and userId will be saved in the localstorage and will be sent with every call that requires authorization
 
+## environment variables
+   in order for the server to work, need to create .env file with the below fields
+   DB_NAME = db name 
+   for mongo db i used atlas, open account at mongodb.com and create a user and get the below details
+   DB_USER = 
+   DB_PASS = 
+   CLUSTER = 
+
+   for redis open an account at https://redis.io/try-free/ and get the below details
+   REDIS_URL = 
+   REDIS_API_KEY = 
+   REDIS_EXPIRATION = decide for how long to cache the frequently clicked urls
+
+   JWT_SECRET = secret to decrypt the jwt
+
+   BASE_SHORTENED_URL = the base url to concatonate to the short url
+
 :) Hope you enjoy itץ
 
 
