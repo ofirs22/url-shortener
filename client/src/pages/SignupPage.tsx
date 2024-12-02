@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const SignupPage: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -19,17 +20,14 @@ const SignupPage: React.FC = () => {
 
     // Handle the signup logic (send API request)
     try {
-      const response = await fetch('/api/v1/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post('http://localhost:3081/api/v1/auth/signup', {
+        email,
+        password,
       });
-
-      if (!response.ok) {
-        throw new Error('Signup failed!');
-      }
+      console.log(response.data)
+      // if (!response.ok) {
+      //   throw new Error('Signup failed!');
+      // }
 
       // Redirect to login page after successful signup
       navigate('/login');

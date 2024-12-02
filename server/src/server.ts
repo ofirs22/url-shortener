@@ -3,7 +3,7 @@ import mongooseSingleton from './config/db.config';
 import RedisClient from './config/redis.config';
 
 
-const PORT = process.env.PORT || 3080;
+const PORT = process.env.PORT || 3081;
 
 // Connect to MongoDB
 (async () => {

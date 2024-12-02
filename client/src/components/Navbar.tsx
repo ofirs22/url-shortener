@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
+    // Simulating login logic
+    navigate('/login');
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem('authToken')
+    localStorage.removeItem('authToken');
+    navigate('/'); // Navigate to the home page after logout
   };
 
-    // useEffect to check the authentication status when the component mounts
-    useEffect(() => {
-        // Check if the JWT token exists in localStorage (or sessionStorage)
-        const token = localStorage.getItem('authToken');
-        setIsLoggedIn(!!token); // Set true if token exists, false otherwise
-      }, []); // Empty dependency array means this runs once after the initial render
+  const handleSignup = () => {
+    navigate('/signup'); // Navigate to the signup page
+  };
+
+  useEffect(() => {
+    // Check if the JWT token exists in localStorage (or sessionStorage)
+    const token = localStorage.getItem('authToken');
+    setIsLoggedIn(!!token); // Set true if token exists, false otherwise
+  }, []); // Empty dependency array means this runs once after the initial render
 
   return (
     <div style={styles.navbar}>
@@ -26,18 +32,11 @@ const Navbar: React.FC = () => {
         <Link to="/" style={styles.link}>
           Home
         </Link>
-        {!isLoggedIn ? (
-          <>
-            <Link to="/login" style={styles.link}>
-              Login
-            </Link>
-            <Link to="/signup" style={styles.link}>
-              Sign Up
-            </Link>
-          </>
-        ) : <Link to="/urls" style={styles.link}>
+        {isLoggedIn && (
+          <Link to="/urls" style={styles.link}>
             URL's
-        </Link>}
+          </Link>
+        )}
       </div>
       <div style={styles.authButtons}>
         {isLoggedIn ? (
@@ -49,7 +48,9 @@ const Navbar: React.FC = () => {
             <button onClick={handleLogin} style={styles.button}>
               Login
             </button>
-            <button style={styles.button}>Sign Up</button>
+            <button onClick={handleSignup} style={styles.button}>
+              Sign Up
+            </button>
           </>
         )}
       </div>

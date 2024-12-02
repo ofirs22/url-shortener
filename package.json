@@ -6,7 +6,8 @@
     "test": "tests"
   },
   "scripts": {
-    "install:all": "concurrently \"npm install --prefix client\" \"npm install --prefix server\""
+    "install:all": "concurrently \"npm install --prefix client\" \"npm install --prefix server\"",
+    "run:all": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\""
   },
   "keywords": [],
   "author": "",
