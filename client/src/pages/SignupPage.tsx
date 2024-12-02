@@ -20,14 +20,14 @@ const SignupPage: React.FC = () => {
 
     // Handle the signup logic (send API request)
     try {
-      const response = await axios.post('http://localhost:3081/api/v1/auth/signup', {
+      const response = await axios.post('http://localhost:3080/api/v1/auth/signup', {
         email,
         password,
       });
       console.log(response.data)
-      // if (!response.ok) {
-      //   throw new Error('Signup failed!');
-      // }
+      if (!response.data.success) {
+        throw new Error('Signup failed!');
+      }
 
       // Redirect to login page after successful signup
       navigate('/login');

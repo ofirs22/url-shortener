@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const db_config_1 = __importDefault(require("./config/db.config"));
 const redis_config_1 = __importDefault(require("./config/redis.config"));
-const PORT = process.env.PORT || 3081;
+const PORT = process.env.PORT || 3080;
 // Connect to MongoDB
 (() => __awaiter(void 0, void 0, void 0, function* () {
     const mongooseInstance = db_config_1.default.getInstance();
