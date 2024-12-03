@@ -55,6 +55,6 @@ Url's can be shorten weather the user is logged in or not, logged in users can e
 
    BASE_SHORTENED_URL = the base url to concatonate to the short url
 
-:) Hope you enjoy itץ
+:) Hope you enjoy it.
 
 
