@@ -5,6 +5,7 @@ import UrlModel from '../model/Url';
 import { encodeBase62 } from '../utils/base62';
 import { IUrl } from '../model/Url';
 import { isAuthenticated } from '../middlewares/auth.middleware'
+import CronManager from '../config/cron.config';
 
 // Helper function to update analytics asynchronously
 const updateAnalytics = async (shortId: string) => {
@@ -70,7 +71,17 @@ const createShortUrl = async (req: Request, res: Response): Promise<void | any> 
       const newUrl = new UrlModel({ shortUrl: shortIdentifier, longUrl: longUrl, userId });
       await newUrl.save();
       console.log("New URL saved to database");
-  
+      CronManager.addJob(shortIdentifier, '*/1 * * * *', async() =>{
+        console.log(shortIdentifier, " Loop")
+        const deletedUrl = await UrlModel.findOneAndDelete({shortUrl: shortIdentifier});
+        
+        client.del(shortUrl);
+        if(deletedUrl){
+          console.log('Short url has been deleted from the database and from cache');
+        }
+        CronManager.removeJob(shortIdentifier);
+      });
+      console.log(CronManager.listJobs())
       return res.status(201).send({
         success: true,
         shortUrl: `${process.env.BASE_SHORTENED_URL}/${shortUrl}`,
@@ -259,7 +270,11 @@ const deleteUrl = async(req: Request, res: Response): Promise<void | any> =>{
         const client = redis.getClient();
         //delete it from cache if it exists
         const delEntry = await client.del(shortUrl)
-
+        //if cron job exist for this short url , remove it
+        if(CronManager.getJob(shortUrl)){
+          CronManager.removeJob(shortUrl);
+        }
+        
         return res.status(200)
         .send({
           success: true, 

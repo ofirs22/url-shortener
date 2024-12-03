@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { formatDateToDDMMYYYY } from '../utils/dateFormatter';
 
 interface Url {
   _id: string;
@@ -10,6 +11,7 @@ interface Url {
     clicks: number;
     lastAccessed: string | null;
   };
+  expiry: Date
 }
 
 const UrlsList = () => {
@@ -154,6 +156,9 @@ const UrlsList = () => {
                 </p>
                 <p>
                   <strong>Last Accessed:</strong> {url.analytics.lastAccessed || 'Never'}
+                </p>
+                <p>
+                  <strong>Expiration date:</strong> {/*url?.expiry ? new Date(url.expiry).toLocaleDateString() : 'Never'*/ formatDateToDDMMYYYY(url.expiry)}
                 </p>
               </div>
               <div>

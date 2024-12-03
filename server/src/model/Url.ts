@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { calculateNext30DaysCron } from '../utils/next30DaysCron';
 
 export interface IUrl extends Document {
   longUrl: string;
@@ -7,7 +8,8 @@ export interface IUrl extends Document {
     clicks: number;
     lastAccessed: Date | null;
   };
-  userId?: string
+  userId?: string;
+  expiry: Date;
 }
 
 const UrlSchema: Schema = new Schema({
@@ -18,6 +20,11 @@ const UrlSchema: Schema = new Schema({
     lastAccessed: null,
   } },
   userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  expiry: {type: Date, default: () => {
+    const now = new Date();
+    now.setDate(now.getDate() + 30); // Add 30 days
+    return now;
+  }}
 });
 
 export default mongoose.model<IUrl>('Url', UrlSchema);

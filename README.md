@@ -37,6 +37,7 @@ Url's can be shorten weather the user is logged in or not, logged in users can e
    - System can be used without loging in but edit and delete wont be available
    - You can signup using the signup button and login using the login button
    - JWT and userId will be saved in the localstorage and will be sent with every call that requires authorization
+   - links expiration - 30 days from creation date, it will display in front end
 
 ## environment variables
    in order for the server to work, need to create .env file with the below fields
