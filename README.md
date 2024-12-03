@@ -41,14 +41,19 @@ Url's can be shorten weather the user is logged in or not, logged in users can e
 ## environment variables
    in order for the server to work, need to create .env file with the below fields
    DB_NAME = db name 
+   
    for mongo db i used atlas, open account at mongodb.com and create a user and get the below details
    DB_USER = 
+   
    DB_PASS = 
+   
    CLUSTER = 
 
    for redis open an account at https://redis.io/try-free/ and get the below details
    REDIS_URL = 
+   
    REDIS_API_KEY = 
+   
    REDIS_EXPIRATION = decide for how long to cache the frequently clicked urls
 
    JWT_SECRET = secret to decrypt the jwt
